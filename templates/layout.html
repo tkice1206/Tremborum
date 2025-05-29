@@ -1,16 +1,22 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Tremborum</title>
+    <meta charset="utf-8">
+    <title>Tremborum-Wiki</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="header">
-        <div class="header-title">Tremborum</div>
-        <div class="header-logout"><a href="/logout">Logout</a></div>
+        <div class="header-center">Tremborum</div>
+        <div class="header-links">
+            <a href="/view/shop" class="nav-link">Shop</a>
+            <a href="/view/forum" class="nav-link">Forum</a>
+            <a href="/view/start" class="nav-link">Wiki</a>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
     </div>
-    <div class="main">
+    <div class="content">
         {% block content %}{% endblock %}
     </div>
 </body>

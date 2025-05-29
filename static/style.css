@@ -4,24 +4,31 @@ body {
     font-family: Arial, sans-serif;
 }
 .header {
-    background-color: #004d40;
+    background-color: #00463e;
     color: white;
-    padding: 15px;
+    padding: 2rem 1rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    position: relative;
 }
-.header-title {
-    font-size: 24px;
+.header-center {
+    font-size: 2rem;
     font-weight: bold;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
-.header-logout a {
+.header-links {
+    position: absolute;
+    right: 1rem;
+}
+.nav-link {
     color: white;
     text-decoration: none;
-    padding: 6px 12px;
-    border: 1px solid white;
-    border-radius: 4px;
+    margin-left: 1rem;
+    font-weight: bold;
 }
-.main {
-    padding: 20px;
+.content {
+    padding: 2rem;
 }
