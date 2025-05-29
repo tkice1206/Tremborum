@@ -1,97 +1,40 @@
+
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>Tremborum</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        header.nav-header {
-            background: #004d40;
-            color: white;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        header.nav-header nav {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-        header.nav-header a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        header.nav-header a:hover {
-            text-decoration: underline;
-        }
-        header.nav-header .brand {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-right: 2rem;
-        }
-    </style>
 </head>
 <body>
-    <header class="nav-header">
-        <nav>
-            <span class="brand">Tremborum</span>
+    <div class="header">
+        <h1 class="title">Tremborum</h1>
+        <div class="nav-links">
             <a href="/view/shop">🛒 Shop</a>
             <a href="/view/forum">💬 Forum</a>
-            <a href="/view/start">📚 Wiki</a>
-        </nav>
-    </header>
-    <div class="container">
-        <nav>
-            <form action="/new" method="post">
-                <input type="text" name="path" placeholder="Neue Seite z. B. 04. Völker/Elfen.md">
-                <button type="submit">➕</button>
+            <a href="/">📚 Wiki</a>
+        </div>
+    </div>
+    <div class="main">
+        <div class="sidebar">
+            {% if session.logged_in %}
+            <form method="post" action="/new">
+                <input name="path" placeholder="Neue Seite z. B. 04. Völker/Elfen">
+                <button type="submit">+</button>
             </form>
-            <ul id="nav">
+            <p><a href="/logout">🔓 Logout</a></p>
+            {% endif %}
+            <ul class="nav">
                 {% for path, name, level, is_dir in entries %}
-                <li class="level-{{ level }} {% if is_dir %}folder{% endif %}">
-                    {% if is_dir %}
-                        <span class="toggle" onclick="toggleChildren(this)">►</span>
-                        <span class="folder-name">{{ name }}</span>
-                    {% else %}
-                        <a href="{{ url_for('view_page', page=path[:-3]) }}">{{ name }}</a>
-                    {% endif %}
+                <li class="level-{{ level }}">
+                    <a href="/view/{{ path|replace('.md','') }}">{{ name }}</a>
                 </li>
                 {% endfor %}
             </ul>
-            <a href="/logout">🔒 Logout</a>
-        </nav>
-        <main>
+        </div>
+        <div class="content">
             {{ content|safe }}
-        </main>
+        </div>
     </div>
-    <script>
-        function toggleChildren(el) {
-            const li = el.parentElement;
-            const level = parseInt(li.className.match(/level-(\d+)/)[1]);
-            let next = li.nextElementSibling;
-            let open = el.textContent === "▼";
-            el.textContent = open ? "►" : "▼";
-            while (next && next.className.includes("level-")) {
-                const nextLevel = parseInt(next.className.match(/level-(\d+)/)[1]);
-                if (nextLevel <= level) break;
-                if (!open && nextLevel === level + 1) {
-                    next.style.display = "list-item";
-                } else {
-                    next.style.display = "none";
-                }
-                next = next.nextElementSibling;
-            }
-        }
-
-        window.onload = function () {
-            document.querySelectorAll("#nav li").forEach(li => {
-                if (!li.classList.contains("level-0") && !li.classList.contains("folder")) {
-                    li.style.display = "none";
-                }
-            });
-        };
-    </script>
 </body>
 </html>
