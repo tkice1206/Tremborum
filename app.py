@@ -1,3 +1,5 @@
+# app.py
+
 from flask import Flask, render_template, request, redirect, url_for, session
 import os
 import markdown
@@ -18,7 +20,23 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html")
+    return redirect(url_for("view_page", page="start"))
+
+@app.route("/wiki")
+@login_required
+def wiki():
+    entries = []
+    for root, dirs, files in os.walk(PAGES_DIR):
+        level = root.replace(PAGES_DIR, '').count(os.sep)
+        folder = os.path.basename(root)
+        relpath = os.path.relpath(root, PAGES_DIR)
+        if relpath == ".":
+            relpath = ""
+        entries.append((relpath.replace("\\", "/"), folder, level, True))
+        for f in sorted(files):
+            if f.endswith(".md"):
+                entries.append((os.path.join(relpath, f).replace("\\", "/"), f, level + 1, False))
+    return render_template("index.html", entries=entries)
 
 @app.route("/view/<path:page>")
 @login_required
