@@ -18,7 +18,7 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    return redirect(url_for("view_page", page="start"))
+    return render_template("index.html")
 
 @app.route("/view/<path:page>")
 @login_required
