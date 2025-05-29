@@ -3,12 +3,16 @@
 <head>
     <title>Tremborum-Wiki</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        .tree ul { list-style-type: none; padding-left: 20px; }
-        .tree li { cursor: pointer; }
-        .nested { display: none; }
-        .active { display: block; }
-    </style>
+    <script>
+        function toggle(id) {
+            var e = document.getElementById(id);
+            if (e.style.display === "none") {
+                e.style.display = "block";
+            } else {
+                e.style.display = "none";
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="header">
@@ -20,27 +24,23 @@
             <a class="logout" href="/logout">Logout</a>
         </div>
     </div>
-    <div class="tree">
-        <ul id="tree-root">
-            {% for path, name, level, is_dir in entries %}
-                <li style="margin-left: {{ level * 20 }}px;" class="{{ 'folder' if is_dir else '' }}">
-                    {% if is_dir %}
-                        <span onclick="toggle(this)">▶ {{ name }}</span>
+    <div class="wiki-sidebar">
+        <ul>
+            {% for path, name, level, is_folder in entries %}
+                {% if is_folder %}
+                    <li style="margin-left:{{ level * 20 }}px;" onclick="toggle('{{ path }}')">
+                        <strong>&#9658; {{ name }}</strong>
+                        <ul id="{{ path }}" style="display:none;">
                     {% else %}
-                        <a href="/view/{{ path }}">{{ name }}</a>
-                    {% endif %}
-                </li>
+                        <li style="margin-left:{{ level * 20 }}px;">
+                            <a href="/view/{{ path[:-3] }}">{{ name[:-3] }}</a>
+                        </li>
+                {% endif %}
             {% endfor %}
         </ul>
     </div>
-    <script>
-        function toggle(el) {
-            let next = el.nextElementSibling;
-            while (next && next.tagName === 'UL') {
-                next.classList.toggle("active");
-                next = next.nextElementSibling;
-            }
-        }
-    </script>
+    <div class="content">
+        <iframe src="/view/start" style="width:100%; height:100vh; border:none;"></iframe>
+    </div>
 </body>
 </html>

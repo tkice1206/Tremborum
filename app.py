@@ -28,12 +28,12 @@ def wiki():
         level = root.replace(PAGES_DIR, '').count(os.sep)
         folder = os.path.basename(root)
         relpath = os.path.relpath(root, PAGES_DIR)
-        if relpath == ".":
-            relpath = ""
-        entries.append((relpath.replace("\\", "/"), folder, level, True))
+        if relpath == "." or folder == "pages":
+            continue
+        entries.append((relpath.replace("\", "/"), folder, level, True))
         for f in sorted(files):
             if f.endswith(".md"):
-                entries.append((os.path.join(relpath, f).replace("\\", "/"), f, level + 1, False))
+                entries.append((os.path.join(relpath, f).replace("\", "/"), f, level + 1, False))
     return render_template("index.html", entries=entries)
 
 @app.route("/view/<path:page>")
