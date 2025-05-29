@@ -6,7 +6,13 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <header><h1>Tremborum-Wiki</h1></header>
+    <header class="nav-header">
+        <nav>
+            <a href="/view/shop.md">🛒 Shop</a>
+            <a href="/view/forum.md">💬 Forum</a>
+            <a href="/">📚 Wiki</a>
+        </nav>
+    </header>
     <div class="container">
         <nav>
             <form action="/new" method="post">
@@ -50,7 +56,6 @@
             }
         }
 
-        // Verstecke alle Unterordner initial
         window.onload = function () {
             document.querySelectorAll("#nav li").forEach(li => {
                 if (!li.classList.contains("level-0") && !li.classList.contains("folder")) {
