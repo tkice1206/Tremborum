@@ -1,3 +1,2 @@
 # Forum
-
-Das Forum ist derzeit in Bearbeitung.
+Diese Seite befindet sich im Aufbau.

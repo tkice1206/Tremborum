@@ -1,17 +1,4 @@
-
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Seite bearbeiten</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <h1>Bearbeiten: {{ page }}</h1>
-    <form method="post">
-        <textarea name="content" rows="25">{{ content }}</textarea><br>
-        <button type="submit">💾 Speichern</button>
-        <a href="{{ url_for('view_page', page=page) }}">Abbrechen</a>
-    </form>
-</body>
-</html>
+<form method="post">
+    <textarea name="content" rows="20" cols="80">{{ content }}</textarea><br>
+    <button type="submit">Speichern</button>
+</form>

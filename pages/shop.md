@@ -1,3 +1,2 @@
 # Shop
-
-Der Shop befindet sich im Aufbau. Bitte schau später nochmal vorbei.
+Diese Seite befindet sich im Aufbau.

@@ -1,34 +1,23 @@
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-}
 .header {
-    background-color: #00463e;
+    background-color: #00423d;
     color: white;
-    padding: 2rem 1rem;
+    padding: 20px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    position: relative;
 }
-.header-center {
-    font-size: 2rem;
+.header .title {
+    font-size: 1.8em;
     font-weight: bold;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
 }
-.header-links {
-    position: absolute;
-    right: 1rem;
-}
-.nav-link {
+.header .menu a {
+    margin: 0 10px;
     color: white;
     text-decoration: none;
-    margin-left: 1rem;
+}
+.header .menu .logout {
     font-weight: bold;
 }
 .content {
-    padding: 2rem;
+    padding: 20px;
 }
