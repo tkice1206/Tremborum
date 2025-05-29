@@ -27,7 +27,7 @@ def index():
         relpath = os.path.relpath(root, PAGES_DIR)
         if relpath == ".":
             relpath = ""
-        entries.append((relpath.replace("\", "/"), folder, level, True))
+        entries.append((relpath.replace("\\", "/"), folder, level, True))
         for f in sorted(files):
             if f.endswith(".md"):
                 entries.append((os.path.join(relpath, f).replace("\", "/"), f, level + 1, False))
