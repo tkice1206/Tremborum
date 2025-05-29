@@ -1,40 +1,17 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Tremborum</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="header">
-        <h1 class="title">Tremborum</h1>
-        <div class="nav-links">
-            <a href="/view/shop">🛒 Shop</a>
-            <a href="/view/forum">💬 Forum</a>
-            <a href="/">📚 Wiki</a>
-        </div>
+        <div class="header-title">Tremborum</div>
+        <div class="header-logout"><a href="/logout">Logout</a></div>
     </div>
     <div class="main">
-        <div class="sidebar">
-            {% if session.logged_in %}
-            <form method="post" action="/new">
-                <input name="path" placeholder="Neue Seite z. B. 04. Völker/Elfen">
-                <button type="submit">+</button>
-            </form>
-            <p><a href="/logout">🔓 Logout</a></p>
-            {% endif %}
-            <ul class="nav">
-                {% for path, name, level, is_dir in entries %}
-                <li class="level-{{ level }}">
-                    <a href="/view/{{ path|replace('.md','') }}">{{ name }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="content">
-            {{ content|safe }}
-        </div>
+        {% block content %}{% endblock %}
     </div>
 </body>
 </html>
