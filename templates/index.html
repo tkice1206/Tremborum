@@ -5,8 +5,33 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="wiki-container">
-        <iframe src="/view/start" style="width:100%; height:100vh; border:none;"></iframe>
+    <div class="header">
+        <div class="title">Tremborum</div>
+        <div class="menu">
+            <a href="/view/shop">Shop</a>
+            <a href="/view/forum">Forum</a>
+            <a href="/wiki">Wiki</a>
+            <a class="logout" href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="main">
+        <div class="sidebar">
+            <ul>
+                {% for path, name, level, is_folder in entries %}
+                    <li style="margin-left: {{ level * 20 }}px">
+                        {% if is_folder %}
+                            <strong>{{ name }}</strong>
+                        {% else %}
+                            <a href="/view/{{ path[:-3] }}">{{ name[:-3] }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="content">
+            <p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>
+        </div>
     </div>
 </body>
 </html>
+
