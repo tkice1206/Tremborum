@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, url_for, session
 import os
 import markdown
@@ -22,16 +21,16 @@ def index():
     entries = []
     for root, dirs, files in os.walk(PAGES_DIR):
         level = root.replace(PAGES_DIR, '').count(os.sep)
-        indent = ' ' * 4 * level
         folder = os.path.basename(root)
         relpath = os.path.relpath(root, PAGES_DIR)
+        relpath = relpath.replace("\\", "/")
         if relpath == ".":
             relpath = ""
-        entries.append((relpath.replace("\\", "/"), folder, level, True))
+        entries.append((relpath, folder, level, True))
         for f in sorted(files):
             if f.endswith(".md"):
                 entries.append((os.path.join(relpath, f).replace("\\", "/"), f, level + 1, False))
-    return render_template("index.html", entries=entries)
+    return render_template("layout.html", entries=entries, content="<h2>Willkommen im Tremborum-Wiki</h2><p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>")
 
 @app.route("/view/<path:page>")
 @login_required
