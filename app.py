@@ -17,8 +17,8 @@ def login_required(f):
 
 @app.route("/")
 @login_required
-def home():
-    return redirect("/wiki")
+def index():
+    return redirect(url_for("view_page", page="start"))
 
 @app.route("/wiki")
 @login_required
@@ -82,7 +82,7 @@ def login():
     if request.method == "POST":
         if request.form["username"] == "admin" and request.form["password"] == "admin":
             session["logged_in"] = True
-            return redirect(url_for("home"))
+            return redirect(url_for("index"))
     return render_template("login.html")
 
 @app.route("/logout")

@@ -1,29 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tremborum Wiki</title>
+    <title>Tremborum-Wiki</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .tree ul { list-style-type: none; padding-left: 20px; }
+        .tree li { cursor: pointer; }
+        .nested { display: none; }
+        .active { display: block; }
+    </style>
 </head>
 <body>
-    <div class="sidebar">
-        <strong>pages</strong>
-        <ul>
-        {% for path, name, level, is_dir in entries %}
-            {% if not path.startswith("forum") and not path.startswith("shop") and not path.startswith("start") %}
-                <li style="margin-left: {{ level * 1.2 }}em;">
+    <div class="header">
+        <div class="title">Tremborum</div>
+        <div class="menu">
+            <a href="/view/shop">Shop</a>
+            <a href="/view/forum">Forum</a>
+            <a href="/wiki">Wiki</a>
+            <a class="logout" href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="tree">
+        <ul id="tree-root">
+            {% for path, name, level, is_dir in entries %}
+                <li style="margin-left: {{ level * 20 }}px;" class="{{ 'folder' if is_dir else '' }}">
                     {% if is_dir %}
-                        <strong>{{ name }}</strong>
+                        <span onclick="toggle(this)">▶ {{ name }}</span>
                     {% else %}
-                        <a href="/view/{{ path|replace('.md', '') }}">{{ name|replace('.md', '') }}</a>
+                        <a href="/view/{{ path }}">{{ name }}</a>
                     {% endif %}
                 </li>
-            {% endif %}
-        {% endfor %}
+            {% endfor %}
         </ul>
     </div>
-    <div class="main">
-        <h1>Willkommen im Tremborum-Wiki</h1>
-        <p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>
-    </div>
+    <script>
+        function toggle(el) {
+            let next = el.nextElementSibling;
+            while (next && next.tagName === 'UL') {
+                next.classList.toggle("active");
+                next = next.nextElementSibling;
+            }
+        }
+    </script>
 </body>
 </html>
