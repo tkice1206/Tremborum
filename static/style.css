@@ -8,10 +8,12 @@ textarea { width: 100%; font-family: monospace; }
 input[type="text"] { width: 70%; }
 button { margin-top: 5px; }
 ul#nav { list-style: none; padding-left: 0; }
-ul#nav li { margin-left: calc(var(--level, 0) * 1em); }
+ul#nav li { margin-left: 0.5em; }
 .level-1 { margin-left: 1em; }
 .level-2 { margin-left: 2em; }
 .level-3 { margin-left: 3em; }
-.folder > a { font-weight: bold; }
+.folder > .folder-name { font-weight: bold; cursor: pointer; }
+.toggle { cursor: pointer; display: inline-block; width: 1em; }
+.folder > a, .folder-name { color: #00796b; text-decoration: none; }
 a { text-decoration: none; color: #00796b; }
 a:hover { text-decoration: underline; }
