@@ -5,33 +5,25 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="header">
-        <div class="title">Tremborum</div>
-        <div class="menu">
-            <a href="/view/shop">Shop</a>
-            <a href="/view/forum">Forum</a>
-            <a href="/wiki">Wiki</a>
-            <a class="logout" href="/logout">Logout</a>
-        </div>
+    <div class="sidebar">
+        <strong>pages</strong>
+        <ul>
+        {% for path, name, level, is_dir in entries %}
+            {% if not path.startswith("forum") and not path.startswith("shop") and not path.startswith("start") %}
+                <li style="margin-left: {{ level * 1.2 }}em;">
+                    {% if is_dir %}
+                        <strong>{{ name }}</strong>
+                    {% else %}
+                        <a href="/view/{{ path|replace('.md', '') }}">{{ name|replace('.md', '') }}</a>
+                    {% endif %}
+                </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
     </div>
     <div class="main">
-        <div class="sidebar">
-            <ul>
-                {% for path, name, level, is_folder in entries %}
-                    <li style="margin-left: {{ level * 20 }}px">
-                        {% if is_folder %}
-                            <strong>{{ name }}</strong>
-                        {% else %}
-                            <a href="/view/{{ path[:-3] }}">{{ name[:-3] }}</a>
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="content">
-            <p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>
-        </div>
+        <h1>Willkommen im Tremborum-Wiki</h1>
+        <p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>
     </div>
 </body>
 </html>
-

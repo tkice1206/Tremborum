@@ -3,6 +3,12 @@
 <head>
     <title>Tremborum</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script>
+    function toggle(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === "none" ? "block" : "none";
+    }
+    </script>
 </head>
 <body>
     <div class="header">
@@ -15,11 +21,7 @@
         </div>
     </div>
     <div class="content">
-        {% if entries %}
-            {% include "index.html" %}
-        {% else %}
-            {{ content|safe }}
-        {% endif %}
+        {{ content|safe }}
     </div>
 </body>
 </html>

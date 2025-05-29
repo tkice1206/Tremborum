@@ -1,5 +1,3 @@
-# app.py
-
 from flask import Flask, render_template, request, redirect, url_for, session
 import os
 import markdown
@@ -19,8 +17,8 @@ def login_required(f):
 
 @app.route("/")
 @login_required
-def index():
-    return redirect(url_for("view_page", page="start"))
+def home():
+    return redirect("/wiki")
 
 @app.route("/wiki")
 @login_required
@@ -84,7 +82,7 @@ def login():
     if request.method == "POST":
         if request.form["username"] == "admin" and request.form["password"] == "admin":
             session["logged_in"] = True
-            return redirect(url_for("index"))
+            return redirect(url_for("home"))
     return render_template("login.html")
 
 @app.route("/logout")
