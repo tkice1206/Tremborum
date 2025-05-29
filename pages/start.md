@@ -1,3 +1,3 @@
-# Willkommen im Wiki
+# Willkommen im Tremborum-Wiki
 
-Dies ist die Startseite deines eigenen Wikis!
+Wähle links eine Kategorie oder erstelle eine neue Seite.

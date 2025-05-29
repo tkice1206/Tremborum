@@ -1,4 +1,17 @@
 
-body { font-family: Arial; margin: 20px; }
-.nav a { margin-right: 10px; }
+body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+header { background: #004d40; color: white; padding: 1rem; text-align: center; }
+.container { flex: 1; display: flex; }
+nav { width: 280px; background: #f0f0f0; padding: 1rem; overflow-y: auto; }
+main { flex: 1; padding: 1rem; overflow-y: auto; }
 textarea { width: 100%; font-family: monospace; }
+input[type="text"] { width: 70%; }
+button { margin-top: 5px; }
+ul#nav { list-style: none; padding-left: 0; }
+ul#nav li { margin-left: calc(var(--level, 0) * 1em); }
+.level-1 { margin-left: 1em; }
+.level-2 { margin-left: 2em; }
+.level-3 { margin-left: 3em; }
+.folder > a { font-weight: bold; }
+a { text-decoration: none; color: #00796b; }
+a:hover { text-decoration: underline; }

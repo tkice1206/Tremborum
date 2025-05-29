@@ -1,16 +1,5 @@
 
-<!doctype html>
-<html>
-<head>
-  <title>Wiki Startseite</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-  <h1>Wiki-Seiten</h1>
-  <ul>
-    {% for page in pages %}
-    <li><a href="{{ url_for('view', page=page) }}">{{ page }}</a></li>
-    {% endfor %}
-  </ul>
-</body>
-</html>
+{% extends "layout.html" %}
+{% block content %}
+<p>Wähle links eine Seite oder erstelle eine neue.</p>
+{% endblock %}

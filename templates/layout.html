@@ -1,18 +1,31 @@
 
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="de">
 <head>
-  <title>{{ title }}</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>Tremborum-Wiki</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="nav">
-    <a href="{{ url_for('index') }}">Start</a> |
-    <a href="{{ url_for('edit', page=title) }}">Bearbeiten</a> |
-    <a href="{{ url_for('logout') }}">Logout</a>
-  </div>
-  <div class="content">
-    {{ content|safe }}
-  </div>
+    <header><h1>Tremborum-Wiki</h1></header>
+    <div class="container">
+        <nav>
+            <form action="/new" method="post">
+                <input type="text" name="path" placeholder="Neue Seite z. B. 04. Völker/Elfen.md">
+                <button type="submit">➕</button>
+            </form>
+            <ul id="nav">
+                {% for path, name, level, is_dir in entries %}
+                <li class="level-{{ level }} {% if is_dir %}folder{% endif %}">
+                    <a href="{{ url_for('view_page', page=path) if not is_dir else '#' }}">{{ name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            <a href="/logout">🔒 Logout</a>
+        </nav>
+        <main>
+            {{ content|safe }}
+        </main>
+    </div>
 </body>
 </html>
