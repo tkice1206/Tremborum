@@ -7,6 +7,7 @@ app = Flask(__name__)
 app.secret_key = 'geheim'
 PAGES_DIR = 'pages'
 
+# --- Login-System ---
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -15,11 +16,60 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        if request.form["username"] == "admin" and request.form["password"] == "admin":
+            session["logged_in"] = True
+            return redirect(url_for("index"))
+        else:
+            error = "Falscher Benutzername oder Passwort"
+    return render_template("login.html", error=error)
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+# --- Startseite ---
 @app.route("/")
 @login_required
 def index():
     return redirect(url_for("view_page", page="start"))
 
+# --- Seitenansicht ---
+@app.route("/view/<path:page>")
+@login_required
+def view_page(page):
+    filepath = os.path.join(PAGES_DIR, page + ".md")
+    if not os.path.isfile(filepath):
+        return render_template("wiki.html", page=page, content="(Seite nicht gefunden.)")
+    with open(filepath, "r", encoding="utf-8") as f:
+        text = f.read()
+        content = markdown.markdown(text)
+    return render_template("wiki.html", page=page, content=content)
+
+# --- Seiten bearbeiten ---
+@app.route("/edit/<path:page>", methods=["GET", "POST"])
+@login_required
+def edit_page(page):
+    filepath = os.path.join(PAGES_DIR, page + ".md")
+    if request.method == "POST":
+        content = request.form.get("content", "")
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+        return redirect(url_for("view_page", page=page))
+
+    if os.path.exists(filepath):
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+    else:
+        content = ""
+    return render_template("edit.html", page=page, content=content)
+
+# --- Sidebar Struktur anzeigen ---
 @app.route("/wiki")
 @login_required
 def wiki():
@@ -33,63 +83,6 @@ def wiki():
         entries.append((relpath.replace("\\", "/"), folder, level, True))
         for f in sorted(files):
             if f.endswith(".md"):
-                entries.append((os.path.join(relpath, f).replace("\\", "/"), f, level + 1, False))
+                name = f[:-3]
+                entries.append((os.path.join(relpath, name).replace("\\", "/"), name, level + 1, False))
     return render_template("index.html", entries=entries)
-
-@app.route("/view/<path:page>")
-@login_required
-def view_page(page):
-    if not page.endswith(".md"):
-        page += ".md"
-    filepath = os.path.join(PAGES_DIR, page)
-    if os.path.exists(filepath):
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = markdown.markdown(f.read())
-        return render_template("layout.html", content=content, page=page)
-    return "Seite nicht gefunden.", 404
-
-@app.route("/edit/<path:page>", methods=["GET", "POST"])
-@login_required
-def edit_page(page):
-    if not page.endswith(".md"):
-        page += ".md"
-    filepath = os.path.join(PAGES_DIR, page)
-    if request.method == "POST":
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(request.form["content"])
-        return redirect(url_for("view_page", page=page[:-3]))
-    content = ""
-    if os.path.exists(filepath):
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-    return render_template("edit.html", content=content, page=page[:-3])
-
-@app.route("/new", methods=["POST"])
-@login_required
-def new_page():
-    path = request.form["path"]
-    full_path = os.path.join(PAGES_DIR, path)
-    if not full_path.endswith(".md"):
-        full_path += ".md"
-    os.makedirs(os.path.dirname(full_path), exist_ok=True)
-    with open(full_path, "w", encoding="utf-8") as f:
-        f.write("# Neue Seite")
-    return redirect(url_for("edit_page", page=path.replace(".md", "")))
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        if request.form["username"] == "admin" and request.form["password"] == "admin":
-            session["logged_in"] = True
-            return redirect(url_for("index"))
-    return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
-
-if __name__ == "__main__":
-    os.makedirs(PAGES_DIR, exist_ok=True)
-    app.run(host="0.0.0.0", port=5000)
