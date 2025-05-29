@@ -2,15 +2,16 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Tremborum-Wiki</title>
+    <title>Tremborum</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header class="nav-header">
         <nav>
-            <a href="/view/shop.md">🛒 Shop</a>
-            <a href="/view/forum.md">💬 Forum</a>
-            <a href="/">📚 Wiki</a>
+            <span class="brand">Tremborum</span>
+            <a href="/view/shop">🛒 Shop</a>
+            <a href="/view/forum">💬 Forum</a>
+            <a href="/view/start">📚 Wiki</a>
         </nav>
     </header>
     <div class="container">
@@ -26,7 +27,7 @@
                         <span class="toggle" onclick="toggleChildren(this)">►</span>
                         <span class="folder-name">{{ name }}</span>
                     {% else %}
-                        <a href="{{ url_for('view_page', page=path) }}">{{ name }}</a>
+                        <a href="{{ url_for('view_page', page=path[:-3]) }}">{{ name }}</a>
                     {% endif %}
                 </li>
                 {% endfor %}

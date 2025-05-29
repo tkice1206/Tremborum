@@ -18,23 +18,13 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    entries = []
-    for root, dirs, files in os.walk(PAGES_DIR):
-        level = root.replace(PAGES_DIR, '').count(os.sep)
-        folder = os.path.basename(root)
-        relpath = os.path.relpath(root, PAGES_DIR)
-        relpath = relpath.replace("\\", "/")
-        if relpath == ".":
-            relpath = ""
-        entries.append((relpath, folder, level, True))
-        for f in sorted(files):
-            if f.endswith(".md"):
-                entries.append((os.path.join(relpath, f).replace("\\", "/"), f, level + 1, False))
-    return render_template("layout.html", entries=entries, content="<h2>Willkommen im Tremborum-Wiki</h2><p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>")
+    return redirect(url_for("view_page", page="start"))
 
 @app.route("/view/<path:page>")
 @login_required
 def view_page(page):
+    if not page.endswith(".md"):
+        page += ".md"
     filepath = os.path.join(PAGES_DIR, page)
     if os.path.exists(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
@@ -45,17 +35,19 @@ def view_page(page):
 @app.route("/edit/<path:page>", methods=["GET", "POST"])
 @login_required
 def edit_page(page):
+    if not page.endswith(".md"):
+        page += ".md"
     filepath = os.path.join(PAGES_DIR, page)
     if request.method == "POST":
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(request.form["content"])
-        return redirect(url_for("view_page", page=page))
+        return redirect(url_for("view_page", page=page[:-3]))
     content = ""
     if os.path.exists(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
-    return render_template("edit.html", content=content, page=page)
+    return render_template("edit.html", content=content, page=page[:-3])
 
 @app.route("/new", methods=["POST"])
 @login_required
@@ -67,7 +59,7 @@ def new_page():
     os.makedirs(os.path.dirname(full_path), exist_ok=True)
     with open(full_path, "w", encoding="utf-8") as f:
         f.write("# Neue Seite")
-    return redirect(url_for("edit_page", page=path))
+    return redirect(url_for("edit_page", page=path.replace(".md", "")))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
