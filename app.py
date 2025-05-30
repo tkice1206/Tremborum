@@ -10,17 +10,7 @@ PAGES_DIR = 'pages'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Authentifizierung
-@login_required
-@app = Flask(__name__)
-app.secret_key = 'geheim'
-PAGES_DIR = 'pages'
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
-
-# Authentifizierung
-@login_required
-
+# --- Authentifizierung ---
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -29,10 +19,11 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+# --- Dateiprüfung ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
-# Login/Logout
+# --- Login/Logout ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error = None
@@ -49,13 +40,13 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# Startseite/Dashboard
+# --- Startseite ---
 @app.route("/")
 @login_required
 def index():
     return render_template("index.html")
 
-# Seite anzeigen
+# --- Seitenansicht ---
 @app.route("/view/<path:page>")
 @login_required
 def view_page(page):
@@ -66,11 +57,11 @@ def view_page(page):
     html = markdown.markdown(text, extensions=['fenced_code'])
     return render_template("wiki.html", page=page, content=html)
 
-# Suche
+# --- Suche ---
 @app.route("/search", methods=["GET","POST"])
 @login_required
 def search():
-    query = request.form.get("q", "").lower()
+    query = request.form.get("q","" ).lower()
     results = []
     for root, _, files in os.walk(PAGES_DIR):
         for f in files:
@@ -82,7 +73,7 @@ def search():
                     results.append((f"{rel}/{name}", name))
     return render_template("search.html", query=query, results=results)
 
-# Seite bearbeiten
+# --- Seiten bearbeiten ---
 @app.route("/edit/<path:page>", methods=["GET", "POST"])
 @login_required
 def edit_page(page):
@@ -98,7 +89,7 @@ def edit_page(page):
         content = open(path, encoding="utf-8").read()
     return render_template("edit.html", page=page, content=content)
 
-# Neue Seite anlegen
+# --- Neue Seite anlegen ---
 @app.route("/new", methods=["GET","POST"])
 @login_required
 def new_page():
@@ -118,7 +109,7 @@ def new_page():
                 return redirect(url_for("edit_page", page=safe))
     return render_template("newpage.html", error=error)
 
-# Datei-Upload
+# --- Datei-Upload ---
 @app.route("/upload", methods=["GET","POST"])
 @login_required
 def upload():
@@ -138,8 +129,8 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# Sidebar-Build mit sortierten Ordnern 01-12
- def build_sidebar():
+# --- Sidebar-Build mit sortierten Ordnern 01-12 ---
+def build_sidebar():
     """Erstellt alphabetisch sortierte Unterordner und Dateien unter pages/"""
     tree = []
     for root, dirs, files in os.walk(PAGES_DIR):
@@ -172,7 +163,7 @@ def uploaded_file(filename):
 def inject_sidebar():
     return {"sidebar": build_sidebar()}
 
-# App starten
+# --- App starten ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
