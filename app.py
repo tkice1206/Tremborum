@@ -11,7 +11,17 @@ UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
 # Authentifizierung
- def login_required(f):
+@login_required
+@app = Flask(__name__)
+app.secret_key = 'geheim'
+PAGES_DIR = 'pages'
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Authentifizierung
+@login_required
+
+def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not session.get("logged_in"):
