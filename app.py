@@ -40,15 +40,16 @@ def logout():
 @app.route("/")
 @login_required
 def index():
+    # Zeigt einfach die Seite index.html als Dashboard oder Übersichtsseite
     return render_template("index.html")
 
 @app.route("/view/<path:page>")
 @login_required
 def view_page(page):
-    path = os.path.join(PAGES_DIR, page + ".md")
-    if not os.path.isfile(path):
+    filepath = os.path.join(PAGES_DIR, page + ".md")
+    if not os.path.isfile(filepath):
         return render_template("wiki.html", page=page, content="**Seite nicht gefunden**")
-    text = open(path, encoding="utf-8").read()
+    text = open(filepath, encoding="utf-8").read()
     html = markdown.markdown(text, extensions=['fenced_code'])
     return render_template("wiki.html", page=page, content=html)
 
@@ -60,8 +61,8 @@ def search():
     for root, _, files in os.walk(PAGES_DIR):
         for f in files:
             if f.endswith(".md"):
-                text = open(os.path.join(root, f), encoding="utf-8").read().lower()
-                if query in text:
+                content = open(os.path.join(root, f), encoding="utf-8").read().lower()
+                if query in content:
                     rel = os.path.relpath(root, PAGES_DIR).replace("\\", "/")
                     name = f[:-3]
                     results.append((f"{rel}/{name}", name))
@@ -121,25 +122,28 @@ def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 def build_sidebar():
+    """Erstellt eine Liste aller Unterordner und Seiten direkt unter pages/."""
     tree = []
     for root, dirs, files in os.walk(PAGES_DIR):
-        level = root.replace(PAGES_DIR, "").count(os.sep)
-        rel = os.path.relpath(root, PAGES_DIR).replace("\\", "/")
-        if rel == ".":
-            rel = ""
+        rel = os.path.relpath(root, PAGES_DIR)
+        if rel == ".":  # überspringe den obersten 'pages'-Ordner
+            continue
+        level = rel.count(os.sep)
+        # Ordner-Eintrag
         tree.append({
             "type": "folder",
-            "name": os.path.basename(root) or "root",
-            "path": rel,
+            "name": os.path.basename(root),
+            "path": rel.replace("\\", "/"),
             "level": level
         })
+        # Markdown-Dateien in diesem Ordner
         for f in sorted(files):
             if f.endswith(".md"):
                 name = f[:-3]
                 tree.append({
                     "type": "file",
                     "name": name,
-                    "path": f"{rel}/{name}" if rel else name,
+                    "path": f"{rel.replace('\\', '/')}/{name}",
                     "level": level + 1
                 })
     return tree

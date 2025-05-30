@@ -10,9 +10,9 @@
   <header>
     <div class="title">Tremborum</div>
     <nav>
+      <a href="{{ url_for('view_page', page='start') }}">Start</a>
       <a href="{{ url_for('view_page', page='shop') }}">Shop</a>
       <a href="{{ url_for('view_page', page='forum') }}">Forum</a>
-      <a href="{{ url_for('index') }}">Wiki</a>
       <a href="{{ url_for('logout') }}" class="logout">Logout</a>
     </nav>
     <form action="{{ url_for('search') }}" method="post" class="search-form">
@@ -26,10 +26,10 @@
       <a href="{{ url_for('upload') }}">📎 Upload</a>
       <ul>
         {% for item in sidebar %}
-          {% if item.type=='folder' %}
+          {% if item.type == 'folder' %}
             <li class="folder level{{ item.level }}">
               <details open>
-                <summary>{{ item.name or 'root' }}</summary>
+                <summary>{{ item.name }}</summary>
           {% else %}
             <li class="file level{{ item.level }}">
               <a href="{{ url_for('view_page', page=item.path) }}">{{ item.name }}</a>
