@@ -1,38 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tremborum Wiki</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <div class="header">
-        <div class="title">Tremborum</div>
-        <div class="menu">
-            <a href="/view/shop">Shop</a>
-            <a href="/view/forum">Forum</a>
-            <a href="/wiki">Wiki</a>
-            <a class="logout" href="/logout">Logout</a>
-        </div>
+{% extends "layout.html" %}
+{% block content %}
+  <article>
+    <h1>{{ page }}</h1>
+    <div class="page-meta">
+      <a href="{{ url_for('edit_page', page=page) }}">📝 Bearbeiten</a>
     </div>
-
-    <div class="container">
-        <div class="sidebar">
-            <ul>
-                {% for path, name, level, is_dir in entries %}
-                    <li style="padding-left: {{ level * 1.2 }}rem;">
-                        {% if is_dir %}
-                            <strong>{{ name }}</strong>
-                        {% else %}
-                            <a href="/view/{{ path | replace('.md', '') }}">{{ name | replace('.md', '') }}</a>
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="main-content">
-            <h1>Willkommen im Tremborum-Wiki</h1>
-            <p>Wähle links eine Kategorie oder erstelle eine neue Seite.</p>
-        </div>
+    <div class="markdown-content">
+      {{ content|safe }}
     </div>
-</body>
-</html>
+  </article>
+{% endblock %}

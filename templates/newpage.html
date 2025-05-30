@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h1>Neue Seite anlegen</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post">
+    <label>Seitenname (ohne Pfad oder .md):</label><br>
+    <input name="name"><br><br>
+    <button type="submit">Erstellen</button>
+  </form>
+{% endblock %}

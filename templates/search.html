@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h1>Suchergebnisse für „{{ query }}“</h1>
+  {% if not results %}
+    <p>Keine Treffer.</p>
+  {% else %}
+    <ul>
+      {% for path,name in results %}
+        <li><a href="{{ url_for('view_page', page=path) }}">{{ name }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

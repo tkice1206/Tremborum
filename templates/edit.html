@@ -1,1 +1,8 @@
-<form method='post'><textarea name='content'>{{ content }}</textarea><button type='submit'>Speichern</button></form>
+{% extends "layout.html" %}
+{% block content %}
+  <h1>Seite bearbeiten: {{ page }}</h1>
+  <form method="post">
+    <textarea name="content" rows="25" style="width:100%;">{{ content }}</textarea><br>
+    <button type="submit">Speichern</button>
+  </form>
+{% endblock %}

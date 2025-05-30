@@ -1,1 +1,3 @@
-# Willkommen in der Welt von Tremborum
+# Startseite
+
+Willkommen im Tremborum Wiki!

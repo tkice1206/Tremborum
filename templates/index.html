@@ -1,46 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tremborum-Wiki</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script>
-        function toggle(id) {
-            var e = document.getElementById(id);
-            if (e.style.display === "none") {
-                e.style.display = "block";
-            } else {
-                e.style.display = "none";
-            }
-        }
-    </script>
-</head>
-<body>
-    <div class="header">
-        <div class="title">Tremborum</div>
-        <div class="menu">
-            <a href="/view/shop">Shop</a>
-            <a href="/view/forum">Forum</a>
-            <a href="/wiki">Wiki</a>
-            <a class="logout" href="/logout">Logout</a>
-        </div>
-    </div>
-    <div class="wiki-sidebar">
-        <ul>
-            {% for path, name, level, is_folder in entries %}
-                {% if is_folder %}
-                    <li style="margin-left:{{ level * 20 }}px;" onclick="toggle('{{ path }}')">
-                        <strong>&#9658; {{ name }}</strong>
-                        <ul id="{{ path }}" style="display:none;">
-                    {% else %}
-                        <li style="margin-left:{{ level * 20 }}px;">
-                            <a href="/view/{{ path[:-3] }}">{{ name[:-3] }}</a>
-                        </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="content">
-        <iframe src="/view/start" style="width:100%; height:100vh; border:none;"></iframe>
-    </div>
-</body>
-</html>
+{% extends "layout.html" %}
+{% block content %}
+<h1>Willkommen im Tremborum Wiki</h1>
+<p>Wähle einen Eintrag aus der Sidebar oder starte eine Suche.</p>
+{% endblock %}
