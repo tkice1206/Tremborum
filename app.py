@@ -40,7 +40,6 @@ def logout():
 @app.route("/")
 @login_required
 def index():
-    # Zeigt einfach die Seite index.html als Dashboard oder Übersichtsseite
     return render_template("index.html")
 
 @app.route("/view/<path:page>")
@@ -122,14 +121,14 @@ def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 def build_sidebar():
-    """Erstellt eine Liste aller Unterordner und Seiten direkt unter pages/."""
+    """Nur die Unterordner von pages, ohne den obersten pages-Ordner."""
     tree = []
     for root, dirs, files in os.walk(PAGES_DIR):
         rel = os.path.relpath(root, PAGES_DIR)
-        if rel == ".":  # überspringe den obersten 'pages'-Ordner
+        if rel == ".":  # skip top-level 'pages'
             continue
         level = rel.count(os.sep)
-        # Ordner-Eintrag
+        # Ordner
         tree.append({
             "type": "folder",
             "name": os.path.basename(root),
@@ -140,10 +139,12 @@ def build_sidebar():
         for f in sorted(files):
             if f.endswith(".md"):
                 name = f[:-3]
+                clean_rel = rel.replace("\\", "/")
+                path_value = clean_rel + "/" + name
                 tree.append({
                     "type": "file",
                     "name": name,
-                    "path": f"{rel.replace('\\', '/')}/{name}",
+                    "path": path_value,
                     "level": level + 1
                 })
     return tree
