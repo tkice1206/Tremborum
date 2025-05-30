@@ -30,7 +30,7 @@
           {% for item in items if item.level == level %}
             {% if item.type == 'folder' %}
               <li class="folder">
-                <details open>
+                <details>
                   <summary>{{ item.name }}</summary>
                   <ul>
                     {{ render_tree(items, level + 1) }}
