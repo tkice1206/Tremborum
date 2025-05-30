@@ -8,9 +8,10 @@
 </head>
 <body>
   <header>
-    <div class="title">Tremborum</div>
+    <div class="title">
+      <a href="{{ url_for('view_page', page='start') }}">Tremborum</a>
+    </div>
     <nav>
-      <a href="{{ url_for('view_page', page='start') }}">Start</a>
       <a href="{{ url_for('view_page', page='shop') }}">Shop</a>
       <a href="{{ url_for('view_page', page='forum') }}">Forum</a>
       <a href="{{ url_for('logout') }}" class="logout">Logout</a>
