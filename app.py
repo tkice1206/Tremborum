@@ -10,7 +10,8 @@ PAGES_DIR = 'pages'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
-def login_required(f):
+# Authentifizierung
+ def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         if not session.get("logged_in"):
@@ -21,6 +22,7 @@ def login_required(f):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
+# Login/Logout
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error = None
@@ -37,11 +39,13 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+# Startseite/Dashboard
 @app.route("/")
 @login_required
 def index():
     return render_template("index.html")
 
+# Seite anzeigen
 @app.route("/view/<path:page>")
 @login_required
 def view_page(page):
@@ -52,10 +56,11 @@ def view_page(page):
     html = markdown.markdown(text, extensions=['fenced_code'])
     return render_template("wiki.html", page=page, content=html)
 
+# Suche
 @app.route("/search", methods=["GET","POST"])
 @login_required
 def search():
-    query = request.form.get("q","").lower()
+    query = request.form.get("q", "").lower()
     results = []
     for root, _, files in os.walk(PAGES_DIR):
         for f in files:
@@ -67,6 +72,7 @@ def search():
                     results.append((f"{rel}/{name}", name))
     return render_template("search.html", query=query, results=results)
 
+# Seite bearbeiten
 @app.route("/edit/<path:page>", methods=["GET", "POST"])
 @login_required
 def edit_page(page):
@@ -82,6 +88,7 @@ def edit_page(page):
         content = open(path, encoding="utf-8").read()
     return render_template("edit.html", page=page, content=content)
 
+# Neue Seite anlegen
 @app.route("/new", methods=["GET","POST"])
 @login_required
 def new_page():
@@ -101,6 +108,7 @@ def new_page():
                 return redirect(url_for("edit_page", page=safe))
     return render_template("newpage.html", error=error)
 
+# Datei-Upload
 @app.route("/upload", methods=["GET","POST"])
 @login_required
 def upload():
@@ -120,23 +128,24 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-def build_sidebar():
-    """Nur die Unterordner von pages, ohne den obersten pages-Ordner."""
+# Sidebar-Build mit sortierten Ordnern 01-12
+ def build_sidebar():
+    """Erstellt alphabetisch sortierte Unterordner und Dateien unter pages/"""
     tree = []
     for root, dirs, files in os.walk(PAGES_DIR):
+        dirs.sort()
+        files.sort()
         rel = os.path.relpath(root, PAGES_DIR)
-        if rel == ".":  # skip top-level 'pages'
+        if rel == ".":
             continue
         level = rel.count(os.sep)
-        # Ordner
         tree.append({
             "type": "folder",
             "name": os.path.basename(root),
             "path": rel.replace("\\", "/"),
             "level": level
         })
-        # Markdown-Dateien in diesem Ordner
-        for f in sorted(files):
+        for f in files:
             if f.endswith(".md"):
                 name = f[:-3]
                 clean_rel = rel.replace("\\", "/")
@@ -153,6 +162,7 @@ def build_sidebar():
 def inject_sidebar():
     return {"sidebar": build_sidebar()}
 
+# App starten
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
