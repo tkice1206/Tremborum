@@ -1,5 +1,3 @@
-Menschen – Körpermerkmale und Physiologie
-Übersicht
-Die Menschen Tremborums sind außergewöhnlich anpassungsfähige Säugetier-Humanoide. Ihre Biologie zeigt leichte regionale Variationen, doch ein gemeinsamer physiologischer Kern verbindet alle Stämme.
-Körperbau
-• Durchschnittsgröße: 1,55 m – 1,90 m, 
+# Menschen_Physiologie
+
+**Inhalt fehlt. Ursprünglich in `Menschen_Physiologie.docx`. Bitte Inhalt hier ergänzen.**

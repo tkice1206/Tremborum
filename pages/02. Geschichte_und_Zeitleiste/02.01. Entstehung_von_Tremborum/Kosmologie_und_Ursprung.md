@@ -1,1 +1,3 @@
-„Es war kein Laut. Kein Licht. Kein Raum. Nur ein Flimmern, ein Gedanke ohne Ursprung. Und in diesem Nichtsein: Drei.“ So beginnt jede Rezitation der Weisen der Alten Zirkel – ein leiser Singsang, den sie seit Äonen bewahren. Bevor Himmel wölbten, bevor Wasser floss, begegneten sich drei Mächte im g
+# Kosmologie_und_Ursprung
+
+**Inhalt fehlt. Ursprünglich in `Kosmologie_und_Ursprung.docx`. Bitte Inhalt hier ergänzen.**
