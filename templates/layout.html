@@ -9,11 +9,9 @@
 <body>
   <header>
     <div class="title">
-      <!-- Logo/Titel verlinkt auf Startseite -->
       <a href="{{ url_for('view_page', page='start') }}">Tremborum</a>
     </div>
     <nav>
-      <!-- Shop, Forum, Logout im Header, nicht in der Sidebar -->
       <a href="{{ url_for('view_page', page='shop') }}">Shop</a>
       <a href="{{ url_for('view_page', page='forum') }}">Forum</a>
       <a href="{{ url_for('logout') }}" class="logout">Logout</a>
@@ -25,35 +23,28 @@
   </header>
   <div class="container">
     <aside class="sidebar">
-      <a href="{{ url_for('new_page') }}">➕ Neue Seite</a>
       <a href="{{ url_for('upload') }}">📎 Upload</a>
       <ul class="sidebar-tree">
-        {# Rekursiver Macro, der jeden node verarbeitet #}
-        {% macro render_node(node) %}
-          {% if node.type == 'folder' %}
-            <li class="folder">
-              <details>
-                <summary>{{ node.name }}</summary>
-                {% if node.children %}
+        {# Rekursiver Macro-Aufruf: jede Folder-Node wird als <details> gerendert #}
+        {% macro render_tree(nodes) %}
+          {% for node in nodes %}
+            {% if node.type == 'folder' %}
+              <li class="folder level{{ node.level }}">
+                <details>
+                  <summary>{{ node.name }}</summary>
                   <ul>
-                    {% for child in node.children %}
-                      {{ render_node(child) }}
-                    {% endfor %}
+                    {{ render_tree(node.children) }}
                   </ul>
-                {% endif %}
-              </details>
-            </li>
-          {% elif node.type == 'file' %}
-            <li class="file">
-              <a href="{{ url_for('view_page', page=node.path) }}">{{ node.name }}</a>
-            </li>
-          {% endif %}
+                </details>
+              </li>
+            {% elif node.type == 'file' %}
+              <li class="file level{{ node.level }}">
+                <a href="{{ url_for('view_page', page=node.path) }}">{{ node.name }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
         {% endmacro %}
-
-        {# Starte mit dem Wurzelknoten-Array 'sidebar' #}
-        {% for node in sidebar %}
-          {{ render_node(node) }}
-        {% endfor %}
+        {{ render_tree(sidebar) }}
       </ul>
     </aside>
     <main class="main">

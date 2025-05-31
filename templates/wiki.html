@@ -1,10 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
   <article>
-    <h1>{{ page }}</h1>
-    <div class="page-meta">
-      <a href="{{ url_for('edit_page', page=page) }}">📝 Bearbeiten</a>
-    </div>
     <div class="markdown-content">
       {{ content|safe }}
     </div>

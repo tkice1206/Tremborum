@@ -10,6 +10,7 @@ PAGES_DIR = 'pages'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
+
 # --- Authentifizierung ---
 def login_required(f):
     @wraps(f)
@@ -19,9 +20,11 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+
 # --- Dateiprüfung ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
+
 
 # --- Login/Logout ---
 @app.route("/login", methods=["GET", "POST"])
@@ -35,18 +38,21 @@ def login():
             error = "Falscher Benutzername oder Passwort"
     return render_template("login.html", error=error)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- Startseite ---
+
+# --- Startseite / Dashboard ---
 @app.route("/")
 @login_required
 def index():
     return render_template("index.html")
 
-# --- Seitenansicht ---
+
+# --- Seitenansicht (Wiki) ---
 @app.route("/view/<path:page>")
 @login_required
 def view_page(page):
@@ -57,59 +63,26 @@ def view_page(page):
     html = markdown.markdown(text, extensions=['fenced_code'])
     return render_template("wiki.html", page=page, content=html)
 
+
 # --- Suche ---
 @app.route("/search", methods=["GET","POST"])
 @login_required
 def search():
-    query = request.form.get("q","").lower()
+    query = request.form.get("q", "").lower()
     results = []
     for root, _, files in os.walk(PAGES_DIR):
         for f in files:
             if f.endswith(".md"):
                 content = open(os.path.join(root, f), encoding="utf-8").read().lower()
                 if query in content:
+                    # rel path ohne .md, mit Forward-Slashes
                     rel = os.path.relpath(root, PAGES_DIR).replace("\\", "/")
                     name = f[:-3]
                     results.append((f"{rel}/{name}", name))
     return render_template("search.html", query=query, results=results)
 
-# --- Seiten bearbeiten ---
-@app.route("/edit/<path:page>", methods=["GET", "POST"])
-@login_required
-def edit_page(page):
-    path = os.path.join(PAGES_DIR, page + ".md")
-    if request.method == "POST":
-        data = request.form["content"]
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(data)
-        return redirect(url_for("view_page", page=page))
-    content = ""
-    if os.path.isfile(path):
-        content = open(path, encoding="utf-8").read()
-    return render_template("edit.html", page=page, content=content)
 
-# --- Neue Seite anlegen ---
-@app.route("/new", methods=["GET","POST"])
-@login_required
-def new_page():
-    error = None
-    if request.method == "POST":
-        name = request.form["name"].strip()
-        if not name:
-            error = "Seitenname darf nicht leer sein"
-        else:
-            safe = secure_filename(name)
-            target = os.path.join(PAGES_DIR, safe + ".md")
-            if os.path.exists(target):
-                error = "Seite existiert bereits"
-            else:
-                with open(target, "w", encoding="utf-8") as f:
-                    f.write(f"# {name}\n\n")
-                return redirect(url_for("edit_page", page=safe))
-    return render_template("newpage.html", error=error)
-
-# --- Datei-Upload ---
+# --- Datei-Upload (zum Ändern/Ersetzen von Markdown-Dateien) ---
 @app.route("/upload", methods=["GET","POST"])
 @login_required
 def upload():
@@ -125,55 +98,65 @@ def upload():
             msg = "Ungültige Datei"
     return render_template("upload.html", msg=msg)
 
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# --- Sidebar-Build: rekursiver Baum mit 'children' ---
+
+# --- Sidebar-Baumstruktur aufbauen (rekursiv) ---
 def build_sidebar():
     """
-    Erstellt eine echte Baumstruktur aller Ordner und Dateien unter 'pages/', 
-    wobei Ordner rekursiv ihre children enthalten. 
-    Überspringt Ordner/Dateien namens 'start', 'shop', 'forum'.
+    Erzeugt einen verschachtelten Baum aller Ordner und Markdown-Dateien unter pages/,
+    sortiert nach Ordnername (alphabetisch). Überspringt 'start', 'shop' und 'forum' komplett.
+    Die Template-Logik (`layout.html`) rendert dann jeden Ordner als <details> und listet die children.
     """
-    def build_tree(current_path):
-        entries = []
-        # Sortiere alphabetisch
-        for item in sorted(os.listdir(current_path)):
-            full = os.path.join(current_path, item)
-            base = os.path.splitext(item)[0]
-            # Ordner/Datei überspringen, wenn der Basisname 'start', 'shop' oder 'forum' (case-insensitive) ist
-            if base.lower() in ("start", "shop", "forum"):
+    def traverse(directory, level=0):
+        nodes = []
+        # Listen aller Einträge (Ordner + Dateien) alphabetisch sortieren
+        try:
+            items = sorted(os.listdir(directory))
+        except FileNotFoundError:
+            return nodes
+
+        for item in items:
+            full_path = os.path.join(directory, item)
+            base_name, ext = os.path.splitext(item)
+
+            # Überspringe systemrelevante Einträge
+            if base_name.lower() in ("start", "shop", "forum"):
                 continue
 
-            # Wenn es ein Ordner ist, erstelle node mit children
-            if os.path.isdir(full):
+            # Ordner
+            if os.path.isdir(full_path):
                 node = {
                     "type": "folder",
                     "name": item,
-                    # Pfad ohne trailing slash, relativ zu PAGES_DIR
-                    "path": os.path.relpath(full, PAGES_DIR).replace("\\", "/"),
-                    "children": build_tree(full)
+                    "path": os.path.relpath(full_path, PAGES_DIR).replace("\\", "/"),
+                    "level": level,
+                    "children": traverse(full_path, level + 1)
                 }
-                entries.append(node)
-            else:
-                # Nur Markdown-Dateien (.md) berücksichtigen
-                if item.endswith(".md"):
-                    node = {
-                        "type": "file",
-                        "name": base,
-                        "path": os.path.relpath(full, PAGES_DIR).replace(".md", "").replace("\\", "/")
-                    }
-                    entries.append(node)
-        return entries
+                nodes.append(node)
 
-    # Starte im Wurzelverzeichnis 'pages'
-    return build_tree(PAGES_DIR)
+            # Markdown-Datei (.md)
+            elif ext.lower() == ".md":
+                node = {
+                    "type": "file",
+                    "name": base_name,
+                    "path": os.path.join(os.path.relpath(directory, PAGES_DIR).replace("\\", "/"), base_name).lstrip("/"),
+                    "level": level
+                }
+                nodes.append(node)
+
+        return nodes
+
+    return traverse(PAGES_DIR, 0)
+
 
 @app.context_processor
 def inject_sidebar():
-    # sidebar ist jetzt eine Liste von nodes (folder/file) mit children
     return {"sidebar": build_sidebar()}
+
 
 # --- App starten ---
 if __name__ == "__main__":
