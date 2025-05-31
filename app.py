@@ -40,7 +40,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- Startseite ---
+# --- Startseite / Dashboard ---
 @app.route("/")
 @login_required
 def index():
@@ -61,7 +61,7 @@ def view_page(page):
 @app.route("/search", methods=["GET","POST"])
 @login_required
 def search():
-    query = request.form.get("q","" ).lower()
+    query = request.form.get("q","").lower()
     results = []
     for root, _, files in os.walk(PAGES_DIR):
         for f in files:
@@ -73,7 +73,7 @@ def search():
                     results.append((f"{rel}/{name}", name))
     return render_template("search.html", query=query, results=results)
 
-# --- Seiten bearbeiten ---
+# --- Seite bearbeiten ---
 @app.route("/edit/<path:page>", methods=["GET", "POST"])
 @login_required
 def edit_page(page):
@@ -129,34 +129,56 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# --- Sidebar-Build mit sortierten Ordnern 01-12 ---
+# --- Neue build_sidebar()-Funktion: Baumstruktur der Ordner ---
 def build_sidebar():
-    """Erstellt alphabetisch sortierte Unterordner und Dateien unter pages/"""
-    tree = []
-    for root, dirs, files in os.walk(PAGES_DIR):
-        dirs.sort()
-        files.sort()
-        rel = os.path.relpath(root, PAGES_DIR)
-        if rel == ".":
-            continue
-        level = rel.count(os.sep)
-        tree.append({
+    """
+    Baut einen echten Baum (nested structure) aus dem 'pages'-Ordner.
+    Jeder Unterordner wird als Knoten mit einer 'children'-Liste angelegt.
+    """
+    def build_node(current_path):
+        # Basis-Informationen zum aktuellen Ordner
+        node = {
             "type": "folder",
-            "name": os.path.basename(root),
-            "path": rel.replace("\\", "/"),
-            "level": level
-        })
+            "name": os.path.basename(current_path),
+            "path": os.path.relpath(current_path, PAGES_DIR).replace("\\", "/"),
+            "children": []
+        }
+        # Erst alle Unterordner (alphabetisch sortiert) recursiv hinzufügen
+        subdirs = sorted([d for d in os.listdir(current_path) if os.path.isdir(os.path.join(current_path, d))])
+        for d in subdirs:
+            child_folder = os.path.join(current_path, d)
+            node["children"].append(build_node(child_folder))
+        # Dann alle Markdown-Dateien in diesem Ordner hinzufügen
+        files = sorted([f for f in os.listdir(current_path) if f.endswith(".md")])
         for f in files:
-            if f.endswith(".md"):
-                name = f[:-3]
-                clean_rel = rel.replace("\\", "/")
-                path_value = clean_rel + "/" + name
-                tree.append({
-                    "type": "file",
-                    "name": name,
-                    "path": path_value,
-                    "level": level + 1
-                })
+            name = f[:-3]
+            rel = os.path.relpath(os.path.join(current_path, f), PAGES_DIR).replace("\\", "/")
+            # Beim relativen Pfad entfernen wir die Dateiendung, da view_page erwartet: page + ".md"
+            rel_no_ext = rel[:-3]  # entfernt ".md"
+            node["children"].append({
+                "type": "file",
+                "name": name,
+                "path": rel_no_ext
+            })
+        return node
+
+    tree = []
+    # Nur die direkt unter PAGES_DIR liegenden Ordner werden als oberste Einträge angezeigt
+    top_folders = sorted([d for d in os.listdir(PAGES_DIR) if os.path.isdir(os.path.join(PAGES_DIR, d))])
+    for folder in top_folders:
+        full_path = os.path.join(PAGES_DIR, folder)
+        tree.append(build_node(full_path))
+
+    # OPTIONAL: Markdown-Dateien, die direkt in pages/ liegen
+    root_md = sorted([f for f in os.listdir(PAGES_DIR) if f.endswith(".md")])
+    for f in root_md:
+        name = f[:-3]
+        tree.append({
+            "type": "file",
+            "name": name,
+            "path": name
+        })
+
     return tree
 
 @app.context_processor
