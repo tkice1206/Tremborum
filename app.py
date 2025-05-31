@@ -10,6 +10,7 @@ PAGES_DIR = 'pages'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 
+
 # --- Authentifizierung ---
 def login_required(f):
     @wraps(f)
@@ -19,11 +20,13 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
-# --- Dateiprüfung ---
+
+# --- Dateityp‐Prüfung für den Upload ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
-# --- Login/Logout ---
+
+# --- Login / Logout ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
     error = None
@@ -35,16 +38,19 @@ def login():
             error = "Falscher Benutzername oder Passwort"
     return render_template("login.html", error=error)
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- Startseite / Dashboard ---
+
+# --- Wurzel‐URL: leitet direkt auf /view/start weiter ---
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html")
+    return redirect(url_for("view_page", page="start"))
+
 
 # --- Seitenansicht (Wiki, Shop, Forum) ---
 @app.route("/view/<path:page>")
@@ -52,19 +58,25 @@ def index():
 def view_page(page):
     filepath = os.path.join(PAGES_DIR, page + ".md")
 
-    # Ermitteln, ob wir die Sidebar anzeigen oder nicht:
-    # Für "shop" und "forum" soll show_sidebar = False sein, sonst True.
+    # Nur bei "shop" und "forum" keine Sidebar anzeigen:
     show_sidebar = not (page.lower() in ("shop", "forum"))
 
     if not os.path.isfile(filepath):
-        # Wenn Seite nicht existiert, trotzdem show_sidebar korrekt weitergeben
-        return render_template("wiki.html", page=page, content="**Seite nicht gefunden**", show_sidebar=show_sidebar)
+        # Seite nicht gefunden – trotzdem Sidebar‐Flag beibehalten
+        return render_template("wiki.html",
+                               page=page,
+                               content="**Seite nicht gefunden**",
+                               show_sidebar=show_sidebar)
 
     text = open(filepath, encoding="utf-8").read()
     html = markdown.markdown(text, extensions=['fenced_code'])
-    return render_template("wiki.html", page=page, content=html, show_sidebar=show_sidebar)
+    return render_template("wiki.html",
+                           page=page,
+                           content=html,
+                           show_sidebar=show_sidebar)
 
-# --- Suche ---
+
+# --- Suche über alle Markdown‐Dateien ---
 @app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
@@ -78,10 +90,11 @@ def search():
                     rel = os.path.relpath(root, PAGES_DIR).replace("\\", "/")
                     name = f[:-3]
                     results.append((f"{rel}/{name}", name))
-    # Suche nutzt immer Sidebar, daher show_sidebar=True
+    # Suche soll immer Sidebar anzeigen:
     return render_template("search.html", query=query, results=results, show_sidebar=True)
 
-# --- Datei-Upload (zum Ändern/Ersetzen von Markdown-Dateien) ---
+
+# --- Datei‐Upload (Markdown, Bilder etc.) ---
 @app.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload():
@@ -95,18 +108,20 @@ def upload():
             msg = "Upload erfolgreich"
         else:
             msg = "Ungültige Datei"
-    # Upload-Seite zeigt keine Sidebar (weil kein eigentlicher Wiki-Content)
+    # Upload‐Formular zeigt keine Sidebar (separat von Wiki‐Inhalten)
     return render_template("upload.html", msg=msg, show_sidebar=False)
+
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# --- Sidebar-Baumstruktur aufbauen (rekursiv) ---
+
+# --- Sidebar‐Baumstruktur erstellen (rekursiv) ---
 def build_sidebar():
     """
     Erzeugt einen verschachtelten Baum aller Ordner und Markdown-Dateien unter pages/,
-    sortiert nach Ordnername (alphabetisch). Überspringt 'start', 'shop' und 'forum' komplett.
+    sortiert alphabetisch. Überspringt dabei 'start', 'shop' und 'forum' komplett.
     """
     def traverse(directory, level=0):
         nodes = []
@@ -119,7 +134,7 @@ def build_sidebar():
             full_path = os.path.join(directory, item)
             base_name, ext = os.path.splitext(item)
 
-            # Überspringe Einträge mit dem Basisnamen 'start', 'shop', 'forum'
+            # Keine Links/Ordner für 'start', 'shop' oder 'forum' in der Sidebar
             if base_name.lower() in ("start", "shop", "forum"):
                 continue
 
@@ -137,8 +152,10 @@ def build_sidebar():
                 node = {
                     "type": "file",
                     "name": base_name,
-                    # relativer Pfad ohne ".md"
-                    "path": os.path.join(os.path.relpath(directory, PAGES_DIR).replace("\\", "/"), base_name).lstrip("/"),
+                    "path": os.path.join(
+                        os.path.relpath(directory, PAGES_DIR).replace("\\", "/"),
+                        base_name
+                    ).lstrip("/"),
                     "level": level
                 }
                 nodes.append(node)
@@ -147,11 +164,13 @@ def build_sidebar():
 
     return traverse(PAGES_DIR, 0)
 
+
 @app.context_processor
 def inject_sidebar():
-    # Sidebar wird nur gesetzt, wenn show_sidebar=True – 
-    # templates können prüfen, ob show_sidebar gesetzt ist.
+    # Die Sidebar‐Daten stehen allen Templates zur Verfügung – ob sie tatsächlich gerendert
+    # werden, entscheidet das Template über show_sidebar.
     return {"sidebar": build_sidebar()}
+
 
 # --- App starten ---
 if __name__ == "__main__":

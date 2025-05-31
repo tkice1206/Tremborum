@@ -1,3 +1,3 @@
-# Startseite
+# Willkommen im Wiki von Tremborum
 
-Willkommen im Tremborum Wiki!
+Wähle einen Eintrag aus der Sidebar oder starte eine Suche.
