@@ -22,31 +22,33 @@
     </form>
   </header>
   <div class="container">
-    <aside class="sidebar">
-      <a href="{{ url_for('upload') }}">📎 Upload</a>
-      <ul class="sidebar-tree">
-        {# Rekursiver Macro-Aufruf: jede Folder-Node wird als <details> gerendert #}
-        {% macro render_tree(nodes) %}
-          {% for node in nodes %}
-            {% if node.type == 'folder' %}
-              <li class="folder level{{ node.level }}">
-                <details>
-                  <summary>{{ node.name }}</summary>
-                  <ul>
-                    {{ render_tree(node.children) }}
-                  </ul>
-                </details>
-              </li>
-            {% elif node.type == 'file' %}
-              <li class="file level{{ node.level }}">
-                <a href="{{ url_for('view_page', page=node.path) }}">{{ node.name }}</a>
-              </li>
-            {% endif %}
-          {% endfor %}
-        {% endmacro %}
-        {{ render_tree(sidebar) }}
-      </ul>
-    </aside>
+    {# Sidebar nur anzeigen, wenn show_sidebar == True #}
+    {% if show_sidebar %}
+      <aside class="sidebar">
+        <a href="{{ url_for('upload') }}">📎 Upload</a>
+        <ul class="sidebar-tree">
+          {% macro render_tree(nodes) %}
+            {% for node in nodes %}
+              {% if node.type == 'folder' %}
+                <li class="folder level{{ node.level }}">
+                  <details>
+                    <summary>{{ node.name }}</summary>
+                    <ul>
+                      {{ render_tree(node.children) }}
+                    </ul>
+                  </details>
+                </li>
+              {% elif node.type == 'file' %}
+                <li class="file level{{ node.level }}">
+                  <a href="{{ url_for('view_page', page=node.path) }}">{{ node.name }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          {% endmacro %}
+          {{ render_tree(sidebar) }}
+        </ul>
+      </aside>
+    {% endif %}
     <main class="main">
       {% block content %}{% endblock %}
     </main>
