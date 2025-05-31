@@ -40,7 +40,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-# --- Startseite / Dashboard ---
+# --- Startseite ---
 @app.route("/")
 @login_required
 def index():
@@ -73,7 +73,7 @@ def search():
                     results.append((f"{rel}/{name}", name))
     return render_template("search.html", query=query, results=results)
 
-# --- Seite bearbeiten ---
+# --- Seiten bearbeiten ---
 @app.route("/edit/<path:page>", methods=["GET", "POST"])
 @login_required
 def edit_page(page):
@@ -129,57 +129,53 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# --- Neue build_sidebar()-Funktion: Baumstruktur der Ordner ---
+# --- Sidebar-Build mit sortierten Ordnern 01-12, ohne forum/shop/start ---
 def build_sidebar():
     """
-    Baut einen echten Baum (nested structure) aus dem 'pages'-Ordner.
-    Jeder Unterordner wird als Knoten mit einer 'children'-Liste angelegt.
+    Erstellt einen rekursiv verschachtelten Baum aller Unterverzeichnisse und Dateien unter pages/,
+    sortiert alphabetisch. Überspringt dabei Seiten bzw. Ordner mit den Namen 'forum', 'shop' und 'start'.
     """
-    def build_node(current_path):
-        # Basis-Informationen zum aktuellen Ordner
-        node = {
-            "type": "folder",
-            "name": os.path.basename(current_path),
-            "path": os.path.relpath(current_path, PAGES_DIR).replace("\\", "/"),
-            "children": []
-        }
-        # Erst alle Unterordner (alphabetisch sortiert) recursiv hinzufügen
-        subdirs = sorted([d for d in os.listdir(current_path) if os.path.isdir(os.path.join(current_path, d))])
-        for d in subdirs:
-            child_folder = os.path.join(current_path, d)
-            node["children"].append(build_node(child_folder))
-        # Dann alle Markdown-Dateien in diesem Ordner hinzufügen
-        files = sorted([f for f in os.listdir(current_path) if f.endswith(".md")])
-        for f in files:
-            name = f[:-3]
-            rel = os.path.relpath(os.path.join(current_path, f), PAGES_DIR).replace("\\", "/")
-            # Beim relativen Pfad entfernen wir die Dateiendung, da view_page erwartet: page + ".md"
-            rel_no_ext = rel[:-3]  # entfernt ".md"
-            node["children"].append({
-                "type": "file",
-                "name": name,
-                "path": rel_no_ext
-            })
-        return node
+    def traverse(dir_path, parent_level):
+        """
+        Rekursive Helfer-Funktion: Gibt eine Liste von Diktaten zurück, die die Baumstruktur für
+        das aktuelle Verzeichnis (dir_path) beschreiben.
+        """
+        entries = []
+        # Liste aller Unterordner und Dateien alphabetisch sortieren
+        items = sorted(os.listdir(dir_path))
+        for item in items:
+            full_path = os.path.join(dir_path, item)
+            # Berechne 'rel_path' relativ zu PAGES_DIR
+            rel_path = os.path.relpath(full_path, PAGES_DIR).replace("\\", "/")
+            # Springe Ordner oder Dateien mit dem Namen start, shop, forum über
+            base_name = os.path.splitext(item)[0]  # ohne .md
+            if base_name.lower() in ("start", "shop", "forum"):
+                continue
 
-    tree = []
-    # Nur die direkt unter PAGES_DIR liegenden Ordner werden als oberste Einträge angezeigt
-    top_folders = sorted([d for d in os.listdir(PAGES_DIR) if os.path.isdir(os.path.join(PAGES_DIR, d))])
-    for folder in top_folders:
-        full_path = os.path.join(PAGES_DIR, folder)
-        tree.append(build_node(full_path))
+            if os.path.isdir(full_path):
+                # Ordner eintragen
+                entries.append({
+                    "type": "folder",
+                    "name": item,
+                    "path": rel_path,
+                    "level": parent_level
+                })
+                # Untereinträge (children) hinzufügen
+                child_entries = traverse(full_path, parent_level + 1)
+                entries.extend(child_entries)
+            else:
+                # Nur .md-Dateien eintragen, keine anderen Dateitypen
+                if item.endswith(".md"):
+                    entries.append({
+                        "type": "file",
+                        "name": base_name,
+                        "path": rel_path[:-3],  # entferne ".md"
+                        "level": parent_level
+                    })
+        return entries
 
-    # OPTIONAL: Markdown-Dateien, die direkt in pages/ liegen
-    root_md = sorted([f for f in os.listdir(PAGES_DIR) if f.endswith(".md")])
-    for f in root_md:
-        name = f[:-3]
-        tree.append({
-            "type": "file",
-            "name": name,
-            "path": name
-        })
-
-    return tree
+    # Starte bei pages/ auf Level 0
+    return traverse(PAGES_DIR, 0)
 
 @app.context_processor
 def inject_sidebar():
