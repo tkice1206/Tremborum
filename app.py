@@ -129,56 +129,50 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-# --- Sidebar-Build mit sortierten Ordnern 01-12, ohne forum/shop/start ---
+# --- Sidebar-Build: rekursiver Baum mit 'children' ---
 def build_sidebar():
     """
-    Erstellt einen rekursiv verschachtelten Baum aller Unterverzeichnisse und Dateien unter pages/,
-    sortiert alphabetisch. Überspringt dabei Seiten bzw. Ordner mit den Namen 'forum', 'shop' und 'start'.
+    Erstellt eine echte Baumstruktur aller Ordner und Dateien unter 'pages/', 
+    wobei Ordner rekursiv ihre children enthalten. 
+    Überspringt Ordner/Dateien namens 'start', 'shop', 'forum'.
     """
-    def traverse(dir_path, parent_level):
-        """
-        Rekursive Helfer-Funktion: Gibt eine Liste von Diktaten zurück, die die Baumstruktur für
-        das aktuelle Verzeichnis (dir_path) beschreiben.
-        """
+    def build_tree(current_path):
         entries = []
-        # Liste aller Unterordner und Dateien alphabetisch sortieren
-        items = sorted(os.listdir(dir_path))
-        for item in items:
-            full_path = os.path.join(dir_path, item)
-            # Berechne 'rel_path' relativ zu PAGES_DIR
-            rel_path = os.path.relpath(full_path, PAGES_DIR).replace("\\", "/")
-            # Springe Ordner oder Dateien mit dem Namen start, shop, forum über
-            base_name = os.path.splitext(item)[0]  # ohne .md
-            if base_name.lower() in ("start", "shop", "forum"):
+        # Sortiere alphabetisch
+        for item in sorted(os.listdir(current_path)):
+            full = os.path.join(current_path, item)
+            base = os.path.splitext(item)[0]
+            # Ordner/Datei überspringen, wenn der Basisname 'start', 'shop' oder 'forum' (case-insensitive) ist
+            if base.lower() in ("start", "shop", "forum"):
                 continue
 
-            if os.path.isdir(full_path):
-                # Ordner eintragen
-                entries.append({
+            # Wenn es ein Ordner ist, erstelle node mit children
+            if os.path.isdir(full):
+                node = {
                     "type": "folder",
                     "name": item,
-                    "path": rel_path,
-                    "level": parent_level
-                })
-                # Untereinträge (children) hinzufügen
-                child_entries = traverse(full_path, parent_level + 1)
-                entries.extend(child_entries)
+                    # Pfad ohne trailing slash, relativ zu PAGES_DIR
+                    "path": os.path.relpath(full, PAGES_DIR).replace("\\", "/"),
+                    "children": build_tree(full)
+                }
+                entries.append(node)
             else:
-                # Nur .md-Dateien eintragen, keine anderen Dateitypen
+                # Nur Markdown-Dateien (.md) berücksichtigen
                 if item.endswith(".md"):
-                    entries.append({
+                    node = {
                         "type": "file",
-                        "name": base_name,
-                        "path": rel_path[:-3],  # entferne ".md"
-                        "level": parent_level
-                    })
+                        "name": base,
+                        "path": os.path.relpath(full, PAGES_DIR).replace(".md", "").replace("\\", "/")
+                    }
+                    entries.append(node)
         return entries
 
-    # Starte bei pages/ auf Level 0
-    return traverse(PAGES_DIR, 0)
+    # Starte im Wurzelverzeichnis 'pages'
+    return build_tree(PAGES_DIR)
 
 @app.context_processor
 def inject_sidebar():
+    # sidebar ist jetzt eine Liste von nodes (folder/file) mit children
     return {"sidebar": build_sidebar()}
 
 # --- App starten ---

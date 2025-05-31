@@ -5,32 +5,15 @@
   <title>Tremborum Wiki</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <style>
-    /* Zusätzliche Styles, damit auf jeder Ebene etwas eingerückt wird */
-    .sidebar-tree {
-      list-style: none;
-      padding-left: 0;
-    }
-    .sidebar-tree ul {
-      list-style: none;
-      margin: 0;
-      padding-left: 1em; /* Einrückung für untergeordnete Ebenen */
-    }
-    .sidebar-tree li.folder > summary {
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .sidebar-tree li.file a {
-      text-decoration: none;
-    }
-  </style>
 </head>
 <body>
   <header>
     <div class="title">
+      <!-- Logo/Titel verlinkt auf Startseite -->
       <a href="{{ url_for('view_page', page='start') }}">Tremborum</a>
     </div>
     <nav>
+      <!-- Shop, Forum, Logout im Header, nicht in der Sidebar -->
       <a href="{{ url_for('view_page', page='shop') }}">Shop</a>
       <a href="{{ url_for('view_page', page='forum') }}">Forum</a>
       <a href="{{ url_for('logout') }}" class="logout">Logout</a>
@@ -45,17 +28,19 @@
       <a href="{{ url_for('new_page') }}">➕ Neue Seite</a>
       <a href="{{ url_for('upload') }}">📎 Upload</a>
       <ul class="sidebar-tree">
-        {# Makro zum rekursiven Rendern eines jeden Baumeintrags #}
+        {# Rekursiver Macro, der jeden node verarbeitet #}
         {% macro render_node(node) %}
           {% if node.type == 'folder' %}
             <li class="folder">
               <details>
                 <summary>{{ node.name }}</summary>
-                <ul>
-                  {% for child in node.children %}
-                    {{ render_node(child) }}
-                  {% endfor %}
-                </ul>
+                {% if node.children %}
+                  <ul>
+                    {% for child in node.children %}
+                      {{ render_node(child) }}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
               </details>
             </li>
           {% elif node.type == 'file' %}
@@ -65,7 +50,7 @@
           {% endif %}
         {% endmacro %}
 
-        {# Auf oberster Ebene alle Knoten durchlaufen #}
+        {# Starte mit dem Wurzelknoten-Array 'sidebar' #}
         {% for node in sidebar %}
           {{ render_node(node) }}
         {% endfor %}
