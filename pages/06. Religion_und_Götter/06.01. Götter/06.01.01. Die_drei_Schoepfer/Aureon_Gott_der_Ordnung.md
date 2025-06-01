@@ -1,4 +1,4 @@
-Aureon – Gott der Ordnung und des Lichts
+Aureon – Gott der Ordnung und des Lichts;
 Rolle: Schöpfer aller Struktur, Gesetz und kosmischer Ordnung.
 Symbole: Goldene Sonne mit sieben Strahlen, stilisierter Kompasskreis.
 Lehren:
