@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify
 import os
 import markdown
 from functools import wraps
@@ -21,7 +21,7 @@ def login_required(f):
     return wrapper
 
 
-# --- Dateityp‐Prüfung für den Upload ---
+# --- Dateityp-Prüfung für den Upload ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
@@ -45,7 +45,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-# --- Wurzel‐URL: leitet direkt auf /view/start weiter ---
+# --- Wurzel-URL: leitet direkt auf /view/start ---
 @app.route("/")
 @login_required
 def index():
@@ -62,7 +62,7 @@ def view_page(page):
     show_sidebar = not (page.lower() in ("shop", "forum"))
 
     if not os.path.isfile(filepath):
-        # Seite nicht gefunden – trotzdem Sidebar‐Flag beibehalten
+        # Wenn Seite nicht existiert, trotzdem show_sidebar weitergeben
         return render_template("wiki.html",
                                page=page,
                                content="**Seite nicht gefunden**",
@@ -76,7 +76,7 @@ def view_page(page):
                            show_sidebar=show_sidebar)
 
 
-# --- Suche über alle Markdown‐Dateien ---
+# --- Suche über alle Markdown-Dateien ---
 @app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
@@ -90,11 +90,11 @@ def search():
                     rel = os.path.relpath(root, PAGES_DIR).replace("\\", "/")
                     name = f[:-3]
                     results.append((f"{rel}/{name}", name))
-    # Suche soll immer Sidebar anzeigen:
+    # Suche zeigt immer Sidebar:
     return render_template("search.html", query=query, results=results, show_sidebar=True)
 
 
-# --- Datei‐Upload (Markdown, Bilder etc.) ---
+# --- Datei-Upload (Markdown, Bilder etc.) ---
 @app.route("/upload", methods=["GET", "POST"])
 @login_required
 def upload():
@@ -108,7 +108,7 @@ def upload():
             msg = "Upload erfolgreich"
         else:
             msg = "Ungültige Datei"
-    # Upload‐Formular zeigt keine Sidebar (separat von Wiki‐Inhalten)
+    # Upload-Seite ohne Sidebar
     return render_template("upload.html", msg=msg, show_sidebar=False)
 
 
@@ -117,11 +117,11 @@ def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
-# --- Sidebar‐Baumstruktur erstellen (rekursiv) ---
+# --- Sidebar-Baumstruktur aufbauen (rekursiv) ---
 def build_sidebar():
     """
     Erzeugt einen verschachtelten Baum aller Ordner und Markdown-Dateien unter pages/,
-    sortiert alphabetisch. Überspringt dabei 'start', 'shop' und 'forum' komplett.
+    sortiert alphabetisch. Überspringt 'start', 'shop' und 'forum' komplett.
     """
     def traverse(directory, level=0):
         nodes = []
@@ -134,7 +134,7 @@ def build_sidebar():
             full_path = os.path.join(directory, item)
             base_name, ext = os.path.splitext(item)
 
-            # Keine Links/Ordner für 'start', 'shop' oder 'forum' in der Sidebar
+            # Keine Links/Ordner für 'start', 'shop' oder 'forum'
             if base_name.lower() in ("start", "shop", "forum"):
                 continue
 
@@ -167,9 +167,55 @@ def build_sidebar():
 
 @app.context_processor
 def inject_sidebar():
-    # Die Sidebar‐Daten stehen allen Templates zur Verfügung – ob sie tatsächlich gerendert
-    # werden, entscheidet das Template über show_sidebar.
+    # Die Sidebar-Daten stehen allen Templates zur Verfügung
     return {"sidebar": build_sidebar()}
+
+
+# ==============================
+# // Hier kommen die neuen API-Endpunkte:
+# ==============================
+
+# 1) GET /api/pages -> Liste aller Markdown-Seiten
+@app.route("/api/pages", methods=["GET"])
+@login_required
+def api_pages():
+    """
+    Liefert als JSON alle Seiten (Pfade ohne '.md'), z.B. ["01.Einleitung", "02.History/Anfang", ...]
+    """
+    pages_list = []
+    for root, _, files in os.walk(PAGES_DIR):
+        for f in files:
+            if f.endswith(".md"):
+                rel = os.path.relpath(root, PAGES_DIR).replace("\\", "/")
+                name = f[:-3]
+                # Kompletter Pfad ohne .md
+                if rel == ".":
+                    pages_list.append(name)
+                else:
+                    pages_list.append(f"{rel}/{name}")
+    return jsonify({"pages": pages_list})
+
+
+# 2) GET /api/page/<path:page> -> Inhalt einer bestimmten Seite (rohes Markdown)
+@app.route("/api/page/<path:page>", methods=["GET"])
+@login_required
+def api_page(page):
+    """
+    Gibt den reinen Markdown-Text von pages/<page>.md als JSON zurück:
+      {"page": "<page>", "content": "<roher Markdown>"}
+    Fehlermeldung, falls die Datei nicht existiert.
+    """
+    filepath = os.path.join(PAGES_DIR, page + ".md")
+    if not os.path.isfile(filepath):
+        return jsonify({"error": "Seite nicht gefunden", "page": page}), 404
+
+    content = open(filepath, encoding="utf-8").read()
+    return jsonify({"page": page, "content": content})
+
+
+# ==============================
+# // Ende der API-Endpunkte
+# ==============================
 
 
 # --- App starten ---
