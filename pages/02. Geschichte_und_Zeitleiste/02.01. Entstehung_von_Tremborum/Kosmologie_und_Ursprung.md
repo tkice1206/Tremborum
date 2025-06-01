@@ -1,3 +1,3 @@
 # Kosmologie_und_Ursprung
 
-**Inhalt fehlt. Ursprünglich in `Kosmologie_und_Ursprung.docx`. Bitte Inhalt hier ergänzen.**
+**Inhalt stammt ursprünglich aus `Kosmologie_und_Ursprung.docx`. Bitte Inhalt aus der DOCX-Datei hier einfügen.**

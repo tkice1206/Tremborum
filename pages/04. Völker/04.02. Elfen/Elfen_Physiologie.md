@@ -1,3 +1,3 @@
 # Elfen_Physiologie
 
-**Inhalt fehlt. Ursprünglich in `Elfen_Physiologie.docx`. Bitte Inhalt hier ergänzen.**
+**Inhalt stammt ursprünglich aus `Elfen_Physiologie.docx`. Bitte Inhalt aus der DOCX-Datei hier einfügen.**

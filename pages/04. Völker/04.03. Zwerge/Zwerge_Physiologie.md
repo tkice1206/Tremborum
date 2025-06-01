@@ -1,3 +1,3 @@
 # Zwerge_Physiologie
 
-**Inhalt fehlt. Ursprünglich in `Zwerge_Physiologie.docx`. Bitte Inhalt hier ergänzen.**
+**Inhalt stammt ursprünglich aus `Zwerge_Physiologie.docx`. Bitte Inhalt aus der DOCX-Datei hier einfügen.**

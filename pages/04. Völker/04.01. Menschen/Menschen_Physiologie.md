@@ -1,3 +1,3 @@
 # Menschen_Physiologie
 
-**Inhalt fehlt. Ursprünglich in `Menschen_Physiologie.docx`. Bitte Inhalt hier ergänzen.**
+**Inhalt stammt ursprünglich aus `Menschen_Physiologie.docx`. Bitte Inhalt aus der DOCX-Datei hier einfügen.**

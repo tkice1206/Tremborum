@@ -1,6 +1,3 @@
-Elyndar – Göttin des Lichts und der Gnade
-**Aspekt:** Güte, Schutz, Licht, Zuneigung
-**Zugehörigkeit:** Tochter von Aureon und Nymera
-**Domäne:** Or’Tharan, das Reich der Ordnung
-**Symbol:** Kreis aus drei Strahlen / offenes Auge in der Sonne
-**Titel:** „Die Flamme der Gnade“, „Aureons Lichtkind“, „
+# Elyndar_Goettin_des_Lichts_und_der_Gnade
+
+**Inhalt stammt ursprünglich aus `Elyndar_Goettin_des_Lichts_und_der_Gnade.docx`. Bitte Inhalt aus der DOCX-Datei hier einfügen.**
