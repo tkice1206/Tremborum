@@ -14,7 +14,6 @@
     <nav>
       <a href="{{ url_for('view_page', page='shop') }}">Shop</a>
       <a href="{{ url_for('view_page', page='forum') }}">Forum</a>
-      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
     </nav>
     <form action="{{ url_for('search') }}" method="post" class="search-form">
       <input type="text" name="q" placeholder="Suche…">
@@ -22,7 +21,6 @@
     </form>
   </header>
   <div class="container">
-    {# Zeige Sidebar nur, wenn show_sidebar == True ist #}
     {% if show_sidebar %}
       <aside class="sidebar">
         <a href="{{ url_for('upload') }}">📎 Upload</a>
