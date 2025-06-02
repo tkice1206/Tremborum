@@ -5,4 +5,5 @@ Lehren:
 - Freiheit entsteht aus dem Bruch.
 - Instinkt ist reiner als Gesetz.
 - Veränderung ist das höchste Gut.
-Anhänger: H
+Anhänger: Hexenzirkel, Schattenorden, wilde Kulte, entartete Schamanen.
+Legenden: Vorthur flüsterte Magie in den Stein, den Nymera formte. Aus dem Bruch kam die Macht.
